@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Service\TimetableService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -22,7 +22,7 @@ class TimetableController extends AbstractController
 
     /**
      * @Route(
-     *     "/timetable/{weeks}/{days}/{semester}",
+     *     "/timetable/{weeks}/{days}/{semester}/{group}",
      *     requirements={
      *         "weeks"="(\d{1,2};)*\d{1,2}",
      *         "days"="[1-7]-[1-7]",
@@ -33,6 +33,7 @@ class TimetableController extends AbstractController
      * @param string $weeks
      * @param string $days
      * @param string $semester
+     * @param string|null $group
      *
      * @return Response
      *
@@ -41,14 +42,25 @@ class TimetableController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function timetable(string $weeks, string $days, string $semester): Response
+    public function timetable(string $weeks, string $days, string $semester, string $group = null): Response
     {
         $semester = '#' . $semester;
+        $groupNumber = null;
+        $groupLetter = null;
 
-        $this->timetableService->getTimetableHtml($weeks, $days, $semester);
+        if ($group) {
+            if (preg_match('/^(\d)?([A-Z])?$/i', $group, $matches)) {
+                $groupNumber = $matches[1] ?? null;
+                $groupLetter = $matches[2] ?? null;
+            }
+        }
+
+        $timeTablePage = $this->timetableService->getTimetablePage($weeks, $days, $semester);
+        $table = $this->timetableService->getTable($timeTablePage);
+        $table = $this->timetableService->filterTable($table, $groupNumber, $groupLetter);
 
         return new Response(
-            "<html lang='de'><body>$weeks  $days $semester</body></html>"
+            "<html lang='de'><body></body></html>"
         );
     }
 }
