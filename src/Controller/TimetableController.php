@@ -57,10 +57,11 @@ class TimetableController extends AbstractController
 
         $timeTablePage = $this->timetableService->getTimetablePage($weeks, $days, $semester);
         $table = $this->timetableService->getTable($timeTablePage);
-        $table = $this->timetableService->filterTable($table, $groupNumber, $groupLetter);
+        $tableData = $this->timetableService->getDataFromTable($table);
+        $this->timetableService->filterTableData($tableData, $groupNumber, $groupLetter);
 
-        return new Response(
-            "<html lang='de'><body></body></html>"
-        );
+        return $this->render('timetable/timetable.html.twig', [
+            'tableData' => $tableData
+        ]);
     }
 }

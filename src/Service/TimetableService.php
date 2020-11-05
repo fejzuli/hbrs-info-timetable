@@ -4,7 +4,6 @@
 namespace App\Service;
 
 
-use DOMXPath;
 use Masterminds\HTML5;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -79,31 +78,61 @@ class TimetableService
         return '';
     }
 
-    public function getCourses(string $tableHtml): array
+    public function getDataFromTable(string $tableHTML): array
     {
-        $dom = (new HTML5())->loadHTML($tableHtml);
-        $xPath = new DOMXPath($dom);
-        $domNodes = $xPath->query("//*[contains(@class, 'liste-veranstaltung')]");
-        $courses = [];
+        $dom = (new HTML5())->loadHTML($tableHTML);
+        $rows = $dom->getElementsByTagName('tr');
+        $data = [];
+        $currentDay = null;
 
-        foreach ($domNodes as $node) {
-            $courses[] = $node->ownerDocument->saveHTML($node);
+        foreach ($rows as $row) {
+            $columns = $row->getElementsBytagName('td');
+            $rowData = [];
+
+            foreach ($columns as $column) {
+                $class = $column->getAttribute('class');
+
+                switch ($class) {
+                    case 'liste-wochentag':
+                        $currentDay = $column->nodeValue;
+                        break;
+                    case 'liste-startzeit':
+                        $rowData['startTime'] = $column->nodeValue;
+                        break;
+                    case 'liste-endzeit':
+                        $rowData['endTime'] = $column->nodeValue;
+                        break;
+                    case 'liste-raum':
+                        $rowData['room'] = $column->nodeValue;
+                        break;
+                    case 'liste-veranstaltung':
+                        $rowData['event'] = $column->nodeValue;
+                        break;
+                    case 'liste-beginn':
+                        $rowData['period'] = $column->nodeValue;
+                        break;
+                    case 'liste-wer':
+                        $rowData['organizer'] = $column->nodeValue;
+                        break;
+                }
+            }
+
+            if ($currentDay) {
+                $rowData['day'] = $currentDay;
+                $data[] = $rowData;
+            }
         }
 
-        print_r($courses);
-
-        return $courses;
+        return $data;
     }
 
-    public function filterTable(string $tableHtml, string $groupNumber = null, string $groupLetter = null): string
+    public function filterTableData(array &$tableData, string $groupNumber = null, string $groupLetter = null): array
     {
-        $dom = (new HTML5())->loadHTML($tableHtml);
-        $xPath = new DOMXPath($dom);
-        $domNodes = $xPath->query("//*[contains(@class, 'liste-veranstaltung')]");
+        foreach ($tableData as $key => $row) {
+            $event = $row['event'];
 
-        foreach ($domNodes as $node) {
-            if (preg_match('/Gr\.? ?((?:\w[+])+\w|\w-\w|\w) /', $node->nodeValue, $matches)) {
-                $groupValue = $matches[1];
+            if (preg_match('/Gr\.? ?((?:\w[+])+\w|\w-\w|\w) /', $event, $groupMatches)) {
+                $groupValue = $groupMatches[1];
 
                 if (
                     ($groupNumber && strpos($groupValue, $groupNumber) !== false) ||
@@ -118,11 +147,10 @@ class TimetableService
                     }
                 }
 
-                $row = $node->parentNode;
-                $row->parentNode->removeChild($row);
+                unset($tableData[$key]);
             }
         }
 
-        return $dom->saveHTML();
+        return $tableData;
     }
 }
