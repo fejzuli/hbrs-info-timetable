@@ -1,17 +1,49 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    <style>
+        form > * {
+            width: 100%;
+            font-family: Verdana, sans-serif;
+        }
+        select {
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            background: #079FE0;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 4px;
+            font-family: Verdana, sans-serif;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <form>
+        <label for="semester">Studiengang/Semester</label>
         <select name="semesters" id="semester">
             {% for semester in semesters %}
                 <option value="{{ semester.value }}">{{ semester.name }}</option>
             {% endfor %}
         </select>
+        <label for="groupNumber">Gruppe</label>
         <select name="groupNumbers" id="groupNumber">
             {% for groupNumber in groupNumbers %}
                 <option value="{{ groupNumber }}">{{ groupNumber }}</option>
             {% endfor %}
         </select>
+        <label for="groupLetter">Gruppe Programmieren</label>
         <select name="groupLetters" id="groupLetter">
             {% for groupLetter in groupLetters %}
                 <option value="{{ groupLetter }}">{{ groupLetter }}</option>

@@ -19,7 +19,7 @@ class HomeController extends AbstractController
             [ 'value' => '#SPLUSF85D4A', 'name' => 'BWI 1' ]
         ];
         $groupNumbers = [ '', 1, 2, 3, 4, 5, 6, 7, 8 ];
-        $groupLetters = [ '', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+        $groupLetters = [ '', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M' ];
 
         return $this->render('home/home.html.twig', [
             'semesters' => $semesters,
