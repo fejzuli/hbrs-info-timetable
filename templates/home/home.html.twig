@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <form>
+        <select name="semesters" id="semester">
+            {% for semester in semesters %}
+                <option value="{{ semester.value }}">{{ semester.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="groupNumbers" id="groupNumber">
+            {% for groupNumber in groupNumbers %}
+                <option value="{{ groupNumber }}">{{ groupNumber }}</option>
+            {% endfor %}
+        </select>
+        <select name="groupLetters" id="groupLetter">
+            {% for groupLetter in groupLetters %}
+                <option value="{{ groupLetter }}">{{ groupLetter }}</option>
+            {% endfor %}
+        </select>
+        </form>
+    <button onclick="createTimetable()">Stundenplan erstellen</button>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function createTimetable () {
+            const semester = document.getElementById('semester').value.replace('#', ''),
+                groupNumber = document.getElementById('groupNumber').value,
+                groupLetter = document.getElementById('groupLetter').value;
+
+            window.location.href = `/timetable/45;46;47;48;49;50;51;54;55;56;57/1-7/${semester}/${groupNumber}${groupLetter}`;
+        }
+    </script>
+{% endblock %}

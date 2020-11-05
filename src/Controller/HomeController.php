@@ -14,6 +14,17 @@ class HomeController extends AbstractController
      */
     public function getHome(): Response
     {
-        return $this->render('base.html.twig');
+        $semesters = [
+            [ 'value' => '#SPLUS1428E2', 'name' => 'BI 1' ],
+            [ 'value' => '#SPLUSF85D4A', 'name' => 'BWI 1' ]
+        ];
+        $groupNumbers = [ '', 1, 2, 3, 4, 5, 6, 7, 8 ];
+        $groupLetters = [ '', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+        return $this->render('home/home.html.twig', [
+            'semesters' => $semesters,
+            'groupNumbers' => $groupNumbers,
+            'groupLetters' => $groupLetters
+        ]);
     }
 }
