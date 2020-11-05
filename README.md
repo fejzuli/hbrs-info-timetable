@@ -23,15 +23,10 @@ Aus diesem Array wird dann im letzten Schritt die Tabelle gebaut und an den Clie
 
 #### Wie geht mein code live?
 
-- Lege zuerst einen neuen Branch an und schreibe in diesem deinen Code
-- Pushe ihn dann auf dieses Repo
+- Forke dieses repo
+- Mach deinen kram
 - Erstelle eine Pull Request auf den Main branch
 - Wenn die Pull Request approved und gemerged wurde wird die Webseite automatisch auf den neuen Stand aktualisiert
-
-#### Bruder ich hab keine Rechte um hier code hochzuladen...
-
-Schreib mich einfach an und ich hau dich als Contributor rein.
-`merlin.fejzuli@smail.inf.h-brs.de`
 
 ### Dokumentation
 
