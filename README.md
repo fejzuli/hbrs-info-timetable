@@ -17,15 +17,15 @@ deshalb solltest du mit diesen Webtechnologien vertraut sein.
 #### Eine kleine Einführung in das Projekt
 
 Die Webseite wird auf dem Server gerendert, da wir zuerst den originalen Stundenplan herunterladen müssen um diesen zu verarbeiten.
-Die Stundenplan wird dann aus dem HTML Dokument extrahiert und zu einem Array mit unseren Daten konvertiert.
+Der Stundenplan wird dann aus dem HTML Dokument extrahiert und zu einem Array mit unseren Daten konvertiert.
 Dieser Array wird dann gefiltert indem wir den Namen der Veranstaltung mit unseren Gruppen abgleichen.
 Aus diesem Array wird dann im letzten Schritt die Tabelle gebaut und an den Client geschickt.
 
 #### Wie geht mein code live?
 
-- Forke dieses repo
-- Mach deinen kram
-- Erstelle eine Pull Request auf den Main branch
+- Forke dieses Repo
+- Mach deinen Kram
+- Erstelle eine Pull Request auf den Main Branch
 - Wenn die Pull Request approved und gemerged wurde wird die Webseite automatisch auf den neuen Stand aktualisiert
 
 ### Dokumentation

@@ -31,6 +31,8 @@
 
 {% block body %}
     <div>
+        <h2 style="color: red">Achtung!</h2>
+        <p>Die Englisch Kurse werden nicht angezeigt, wenn nach Gruppen gefiltert wird!</p>
         <h2>Haftungsausschluss</h2>
         <p>
             Dies ist ein Stundenplan-Werkzeug von Studenten für Studenten. Die Hochschule Bonn-Rhein-Sieg hat
@@ -41,6 +43,36 @@
         <p>
             <a href="https://eva2.inf.h-brs.de/stundenplan/">Offizieller von der H-BRS gegebener Stundenplan</a>
         </p>
+    </div>
+    <h2>Stundenplan konfigurieren</h2>
+    <form>
+        <label for="semester">Studiengang/Semester</label>
+        <select name="semesters" id="semester">
+            {% for semester in semesters %}
+                <option value="{{ semester.value }}">{{ semester.name }}</option>
+            {% endfor %}
+        </select>
+        <label for="groupNumber">Gruppe Nummer</label>
+        <select name="groupNumbers" id="groupNumber">
+            {% for groupNumber in groupNumbers %}
+                <option value="{{ groupNumber }}">{{ groupNumber }}</option>
+            {% endfor %}
+        </select>
+        <label for="groupLetter">Gruppe Buchstabe</label>
+        <select name="groupLetters" id="groupLetter">
+            {% for groupLetter in groupLetters %}
+                <option value="{{ groupLetter }}">{{ groupLetter }}</option>
+            {% endfor %}
+        </select>
+        <label for="organizer">Einführung in die Programmierung Dozent</label>
+        <select name="organizers" id="organizer">
+            {% for organizer in organizers %}
+                <option value="{{ organizer }}">{{ organizer }}</option>
+            {% endfor %}
+        </select>
+        </form>
+    <button onclick="createTimetable()">Stundenplan erstellen</button>
+    <div>
         <h3>Wie benutze ich den scheiß???</h3>
         <p>
             Wähle deinen Studiengang und Semester.
@@ -57,28 +89,6 @@
             <a href="https://github.com/mafejzuli/hbrs-info-timetable/blob/main/README.md">Hier</a> findest du alle Informationen zum Thema Mitwirken.
         </p>
     </div>
-    <h2>Stundenplan konfigurieren</h2>
-    <form>
-        <label for="semester">Studiengang/Semester</label>
-        <select name="semesters" id="semester">
-            {% for semester in semesters %}
-                <option value="{{ semester.value }}">{{ semester.name }}</option>
-            {% endfor %}
-        </select>
-        <label for="groupNumber">Gruppe</label>
-        <select name="groupNumbers" id="groupNumber">
-            {% for groupNumber in groupNumbers %}
-                <option value="{{ groupNumber }}">{{ groupNumber }}</option>
-            {% endfor %}
-        </select>
-        <label for="groupLetter">Gruppe Programmieren</label>
-        <select name="groupLetters" id="groupLetter">
-            {% for groupLetter in groupLetters %}
-                <option value="{{ groupLetter }}">{{ groupLetter }}</option>
-            {% endfor %}
-        </select>
-        </form>
-    <button onclick="createTimetable()">Stundenplan erstellen</button>
 {% endblock %}
 
 {% block javascripts %}
@@ -87,8 +97,13 @@
             const semester = document.getElementById('semester').value.replace('#', ''),
                 groupNumber = document.getElementById('groupNumber').value,
                 groupLetter = document.getElementById('groupLetter').value;
+            let organizer = document.getElementById('organizer').value;
 
-            window.location.href = `/timetable/45;46;47;48;49;50;51;54;55;56;57/1-7/${semester}/${groupNumber}${groupLetter}`;
+            if (organizer) {
+                organizer = '_' + organizer
+            }
+
+            window.location.href = `/timetable/45;46;47;48;49;50;51;54;55;56;57/1-7/${semester}/${groupNumber}${groupLetter}${organizer}`;
         }
     </script>
 {% endblock %}

@@ -34,21 +34,19 @@
                 <th>Tag</th>
                 <th>Start</th>
                 <th>Ende</th>
-                <th>Raum</th>
                 <th>Veranstaltung</th>
-                <th>Zeitraum</th>
+                <th>Gruppe</th>
                 <th>Wer</th>
             </tr>
             {% for row in tableData %}
-                <tr>
-                    <td>{{ row.day }}</td>
-                    <td>{{ row.startTime }}</td>
-                    <td>{{ row.endTime }}</td>
-                    <td>{{ row.room }}</td>
-                    <td>{{ row.event }}</td>
-                    <td>{{ row.period }}</td>
-                    <td>{{ row.organizer }}</td>
-                </tr>
+            <tr>
+                <td>{{ row.day }}</td>
+                <td>{{ row.startTime }}</td>
+                <td>{{ row.endTime }}</td>
+                <td>{{ row.eventName }} ({{ row.eventType }})</td>
+                <td>{{ row.groupName }}</td>
+                <td>{{ row.organizer }}</td>
+            </tr>
             {% endfor %}
         </table>
     </div>
