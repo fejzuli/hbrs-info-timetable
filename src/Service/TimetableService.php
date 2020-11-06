@@ -15,6 +15,9 @@ class TimetableService
 {
     private static $TIMETABLE_URL = 'https://eva2.inf.h-brs.de/stundenplan/anzeigen/';
     private static $TERM = '58093cf2610304f595ab37c08e58bcf3';
+    private static $EVENT_EXTRAS_PATTERN = '/(?:\(([A-ZÀ-ÖØ-öø-ÿ ]+)\) )?(?:Gr\.? ?(alle|[A-Z1-9](?:\-?[1-9]*)(?:\+[A-Z1-9])*) )?(?:\(Raum ausser KW 46\) )?\(([VPÜ])\)$/iu';
+    private static $EVENT_NAME_PATTERN_COMPLEX = '/^([^(]+) (?:\([A-Za-zÀ-ÖØ-öø-ÿ ]+\).*\([VPÜ]\)|Gr.+)$/iu';
+    private static $EVENT_NAME_PATTERN_SIMPLE = '/^(.+) \([VPÜ]\)$/iu';
     private $client;
 
     public function __construct(HttpClientInterface $client)
@@ -78,41 +81,71 @@ class TimetableService
         return '';
     }
 
-    public function getDataFromTable(string $tableHTML): array
+    public function parseTableData(string $tableHTML): array
     {
         $dom = (new HTML5())->loadHTML($tableHTML);
         $rows = $dom->getElementsByTagName('tr');
-        $data = [];
         $currentDay = null;
+        $data = [];
 
         foreach ($rows as $row) {
-            $columns = $row->getElementsBytagName('td');
-            $rowData = [];
+            $columns = $row->getElementsByTagName('td');
+            $rowData = [
+                'day' => null,
+                'startTime' => null,
+                'endTime' => null,
+                'room' => null,
+                'eventName' => null,
+                'eventUrl' => null,
+                'groupName' => null,
+                'groupUrl' => null,
+                'period' => null,
+                'organizer' => '',
+                'filterOrganizer' => null,
+                'eventType' => null
+            ];
 
             foreach ($columns as $column) {
                 $class = $column->getAttribute('class');
+                $value = $column->nodeValue;
 
                 switch ($class) {
                     case 'liste-wochentag':
-                        $currentDay = $column->nodeValue;
+                        $currentDay = $value;
                         break;
                     case 'liste-startzeit':
-                        $rowData['startTime'] = $column->nodeValue;
+                        $rowData['startTime'] = $value;
                         break;
                     case 'liste-endzeit':
-                        $rowData['endTime'] = $column->nodeValue;
+                        $rowData['endTime'] = $value;
                         break;
                     case 'liste-raum':
-                        $rowData['room'] = $column->nodeValue;
+                        $rowData['room'] = $value;
                         break;
                     case 'liste-veranstaltung':
-                        $rowData['event'] = $column->nodeValue;
+                        if (preg_match(self::$EVENT_EXTRAS_PATTERN, $value, $eventExtras, PREG_UNMATCHED_AS_NULL)) {
+                            if ($eventExtras[1] && ($eventExtras[1] === 'Priesnitz' || $eventExtras[1] === 'Berrendorf')) {
+                                $rowData['filterOrganizer'] = $eventExtras[1];
+                            }
+
+                            $rowData['groupName'] = $eventExtras[2] ?? null;
+                            $rowData['eventType'] = $eventExtras[3] ?? null;
+                        }
+                        if (preg_match(self::$EVENT_NAME_PATTERN_COMPLEX, $value, $eventNameComplex)) {
+                            $rowData['eventName'] = $eventNameComplex[1];
+                        }
+                        else if (preg_match(self::$EVENT_NAME_PATTERN_SIMPLE, $value, $eventNameSimple)) {
+                            $rowData['eventName'] = $eventNameSimple[1];
+                        }
+                        else {
+                            $rowData['eventName'] = $value;
+                        }
                         break;
                     case 'liste-beginn':
-                        $rowData['period'] = $column->nodeValue;
+                        $rowData['period'] = $value;
                         break;
                     case 'liste-wer':
-                        $rowData['organizer'] = $column->nodeValue;
+                        $rowData['organizer'] = $value;
                         break;
                 }
             }
@@ -126,31 +159,33 @@ class TimetableService
         return $data;
     }
 
-    public function filterTableData(array &$tableData, string $groupNumber = null, string $groupLetter = null): array
-    {
+    public function filterTableData(
+        array &$tableData,
+        string $groupNumber = null,
+        string $groupLetter = null,
+        string $organizer = null
+    ) {
         foreach ($tableData as $key => $row) {
-            $event = $row['event'];
-
-            if (preg_match('/Gr\.? ?((?:\w[+])+\w|\w-\w|\w) /', $event, $groupMatches)) {
-                $groupValue = $groupMatches[1];
-
-                if (
-                    ($groupNumber && strpos($groupValue, $groupNumber) !== false) ||
-                    ($groupLetter && stripos($groupValue, $groupLetter) !== false)
-                ) {
-                    continue;
-                }
-
-                if (preg_match('/(\w)-(\w)/i', $groupValue, $rangeMatches)) {
-                    if ($rangeMatches[1] < $groupNumber && $groupNumber < $rangeMatches[2]) {
-                        continue;
-                    }
-                }
-
+            if ($organizer && $row['filterOrganizer'] && $row['filterOrganizer'] !== $organizer) {
                 unset($tableData[$key]);
             }
-        }
 
-        return $tableData;
+            $groupName = $row['groupName'] ?? null;
+
+            if ($groupName && $groupName !== 'alle') {
+                if (
+                    (!$groupNumber || strpos($groupName, $groupNumber) === false) &&
+                    (!$groupLetter || strpos($groupName, $groupLetter) === false)
+                ) {
+                    if (preg_match('/(\w)-(\w)/i', $groupName, $range)) {
+                        if ($range[1] < $groupNumber && $groupNumber < $range[2]) {
+                            continue;
+                        }
+                    }
+
+                    unset($tableData[$key]);
+                }
+            }
+        }
     }
 }
