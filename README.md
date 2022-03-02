@@ -1,3 +1,5 @@
+# Dieses Projekt wurde aufgegeben!
+
 # hbrs-info-timetable
 
 Dies ist ein Werkzeug um einen individuellen Stundenplan zu erstellen.
